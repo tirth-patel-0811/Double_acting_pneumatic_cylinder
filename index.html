@@ -1,209 +1,300 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Player</title>
+
+    <title>Double Acting Pneumatic Cylinder</title>
 
     <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
         body {
             margin: 0;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #111;
+            padding: 0;
+            width: 100%;
+            min-height: 100%;
+            background: transparent;
+        }
+
+        body {
             font-family: Arial, sans-serif;
         }
 
         .video-container {
             width: 800px;
-            max-width: 90%;
-            background: #222;
-            padding: 20px;
-            border-radius: 12px;
+            max-width: 95%;
+            margin: 20px auto;
+            padding: 0;
+            background: transparent;
         }
 
         video {
             width: 100%;
+            height: auto;
             display: block;
             border-radius: 8px;
-            background: black;
+            background: transparent;
         }
 
+
         .controls {
-            margin-top: 15px;
+            width: 100%;
+            margin-top: 12px;
+
             display: flex;
             align-items: center;
             gap: 12px;
+
+            background: transparent;
         }
 
+        /* PLAY / PAUSE BUTTON */
+
         #playPause {
-            width: 90px;
-            padding: 10px;
-            border: none;
+            min-width: 80px;
+            padding: 8px 14px;
+
+            border: 1px solid #999;
             border-radius: 6px;
-            background: #007bff;
-            color: white;
-            font-size: 16px;
+
+            background: rgba(255, 255, 255, 0.9);
+            color: #222;
+
+            font-size: 14px;
             cursor: pointer;
         }
 
         #playPause:hover {
-            background: #0056b3;
+            background: white;
         }
+
 
         #seekBar {
             flex: 1;
+            height: 5px;
+
             cursor: pointer;
+
+            accent-color: #007bff;
         }
 
+
         #time {
-            color: white;
-            min-width: 100px;
-            text-align: right;
+            min-width: 95px;
+
+            color: #222;
+
             font-size: 14px;
+            text-align: right;
+
+            white-space: nowrap;
         }
+
+
+        @media (max-width: 600px) {
+
+            .video-container {
+                max-width: 100%;
+                margin: 10px auto;
+            }
+
+            .controls {
+                gap: 8px;
+            }
+
+            #playPause {
+                min-width: 70px;
+                padding: 7px 10px;
+                font-size: 13px;
+            }
+
+            #time {
+                min-width: 80px;
+                font-size: 12px;
+            }
+
+        }
+
     </style>
 </head>
 
+
 <body>
 
-<div class="video-container">
+    <div class="video-container">
 
-    <video id="video">
-        <source src="video.mp4" type="video/mp4">
-        Your browser does not support HTML5 video.
-    </video>
 
-    <div class="controls">
+        <video id="video" preload="metadata">
 
-        <button id="playPause">Play</button>
+            <source src="video.mp4" type="video/mp4">
 
-        <input
-            type="range"
-            id="seekBar"
-            min="0"
-            max="100"
-            value="0"
-            step="0.1"
-        >
+            Your browser does not support HTML5 video.
 
-        <span id="time">00:00 / 00:00</span>
+        </video>
+
+        <div class="controls">
+
+            <button id="playPause">
+                Play
+            </button>
+
+
+            <input
+                type="range"
+                id="seekBar"
+                min="0"
+                max="100"
+                value="0"
+                step="0.1"
+            >
+
+
+            <span id="time">
+                00:00 / 00:00
+            </span>
+
+        </div>
 
     </div>
 
-</div>
 
-<script>
+    <script>
 
-    const video = document.getElementById("video");
-    const playPause = document.getElementById("playPause");
-    const seekBar = document.getElementById("seekBar");
-    const timeDisplay = document.getElementById("time");
+        const video = document.getElementById("video");
+
+        const playPause = document.getElementById("playPause");
+
+        const seekBar = document.getElementById("seekBar");
+
+        const timeDisplay = document.getElementById("time");
 
 
-    // PLAY / PAUSE BUTTON
-    playPause.addEventListener("click", function () {
 
-        if (video.paused) {
-            video.play();
-            playPause.textContent = "Pause";
-        } else {
+        playPause.addEventListener("click", function () {
+
+            if (video.paused) {
+
+                video.play();
+
+                playPause.textContent = "Pause";
+
+            } else {
+
+                video.pause();
+
+                playPause.textContent = "Play";
+
+            }
+
+        });
+
+
+        video.addEventListener("timeupdate", function () {
+
+            if (video.duration) {
+
+                const percentage =
+                    (video.currentTime / video.duration) * 100;
+
+                seekBar.value = percentage;
+
+                updateTime();
+
+            }
+
+        });
+
+
+        seekBar.addEventListener("input", function () {
+
             video.pause();
+
+            if (video.duration) {
+
+                const newTime =
+                    (seekBar.value / 100) * video.duration;
+
+                video.currentTime = newTime;
+
+                updateTime();
+
+            }
+
             playPause.textContent = "Play";
-        }
 
-    });
+        });
 
 
-    // UPDATE SLIDER WHILE VIDEO IS PLAYING
-    video.addEventListener("timeupdate", function () {
-
-        if (video.duration) {
-
-            const percentage =
-                (video.currentTime / video.duration) * 100;
-
-            seekBar.value = percentage;
+        video.addEventListener("loadedmetadata", function () {
 
             updateTime();
 
-        }
-
-    });
+        });
 
 
-    // WHEN USER TOUCHES / CLICKS / DRAGS SLIDER
-    seekBar.addEventListener("input", function () {
+        video.addEventListener("ended", function () {
 
-        // Automatically pause video
-        video.pause();
+            playPause.textContent = "Play";
 
-        // Change video time according to slider
-        if (video.duration) {
-
-            const newTime =
-                (seekBar.value / 100) * video.duration;
-
-            video.currentTime = newTime;
+            seekBar.value = 100;
 
             updateTime();
 
+        });
+
+
+
+        function formatTime(seconds) {
+
+            if (isNaN(seconds)) {
+
+                return "00:00";
+
+            }
+
+
+            const minutes =
+                Math.floor(seconds / 60);
+
+
+            const secs =
+                Math.floor(seconds % 60);
+
+
+            return (
+                String(minutes).padStart(2, "0")
+                +
+                ":"
+                +
+                String(secs).padStart(2, "0")
+            );
+
         }
 
-        // Make button show Play
-        playPause.textContent = "Play";
 
-    });
+        function updateTime() {
 
-
-    // VIDEO LOADED
-    video.addEventListener("loadedmetadata", function () {
-
-        updateTime();
-
-    });
+            const current =
+                formatTime(video.currentTime);
 
 
-    // VIDEO ENDS
-    video.addEventListener("ended", function () {
-
-        playPause.textContent = "Play";
-
-    });
+            const total =
+                formatTime(video.duration);
 
 
-    // FORMAT TIME
-    function formatTime(seconds) {
+            timeDisplay.textContent =
+                current + " / " + total;
 
-        if (isNaN(seconds)) {
-            return "00:00";
         }
 
-        const minutes = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
+    </script>
 
-        return (
-            String(minutes).padStart(2, "0") +
-            ":" +
-            String(secs).padStart(2, "0")
-        );
-
-    }
-
-
-    // UPDATE TIME DISPLAY
-    function updateTime() {
-
-        const current = formatTime(video.currentTime);
-        const total = formatTime(video.duration);
-
-        timeDisplay.textContent =
-            current + " / " + total;
-
-    }
-
-</script>
 </body>
+
 </html>
